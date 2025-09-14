@@ -23,9 +23,9 @@ def is_valid_domain(domain: str) -> bool:
 
     return True
 
-def generate_header(seq_id: int) -> str:
-    now = datetime.now()
-    header = now.strftime("%H%M%S") + f"{seq_id:02d}"
+def generate_header(pkt_time,seq_id: int) -> str:
+    dt = datetime.fromtimestamp(float(pkt_time))    
+    header = dt.strftime("%H%M%S") + f"{seq_id:02d}"    #HHMMSS format + 2-digit seq
     return header
 
 def parse_pcap_and_send(pcap_file: str):
@@ -40,20 +40,20 @@ def parse_pcap_and_send(pcap_file: str):
                 domain = pkt[DNSQR].qname.decode().rstrip(".")
                 if not is_valid_domain(domain):
                     continue
-                header = generate_header(seq_id)
+                header = generate_header(pkt.time,seq_id) #new header
 
-                # Prepare message: header + domain name
+                # new message: header + domain name
                 message = f"{header}|{domain}"
                 sock.sendto(message.encode(), (SERVER_HOST, SERVER_PORT))
 
                 # Receive response
                 data, _ = sock.recvfrom(1024)
-                resolved_ip = data.decode().strip()
+                resolved_ip = data.decode().strip() #convert bytes to str
 
                 results.append((header, domain, resolved_ip))
                 print(f"[Client] {header} {domain} -> {resolved_ip}")
 
-                seq_id += 1
+                seq_id += 1 
 
     sock.close()
     return results
