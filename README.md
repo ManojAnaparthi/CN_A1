@@ -1,6 +1,6 @@
 # CN_A1
 
-This project demonstrates DNS resolution using a client-server setup.  
+This assignment demonstrates DNS resolution using a client-server setup.  
 
 ---
 
